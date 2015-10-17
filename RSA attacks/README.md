@@ -1,16 +1,15 @@
 This is the first time I have written code in python so the code might not
 be (very) clean.
 
-Attack against RSAES-OAEP PKCS #1 based on error codes
-======================================================
+###Attack against RSAES-OAEP PKCS #1 based on error codes
+
 * In the third step of the OAEP attack, when the difference between the m_min and m_max is less
   than a threshold (10-15 bits at most in python) I switch to brute forcing the
   cipher; for every bit in the difference it saves approximately one query to 
   the oracle. 
   
 
-Timing attack on RSA
-====================
+###Timing attack on RSA
 * Any time the attack fails I increase the sample size by 50%, adding new
   messages;
   
@@ -64,18 +63,24 @@ Timing attack on RSA
   
   
 Citations
+
     [1] Exponent Blinding May Not Prevent Timing Attacks on RSA; Werner Schindler
         https://eprint.iacr.org/2014/869.pdf
+        
     [2] A Provably Secure And Efficient Countermeasure Against Timing Attacks;
         Boris Kopf and Markus Durmuth
         http://software.imdea.org/~bkoepf/papers/csf09.pdf
+        
     [3] Timing Attacks on RSA: Revealing Your Secrets through the Fourth Dimension;
         Wing H. Wong
         http://www.cs.sjsu.edu/faculty/stamp/students/article.html   
+        
     [4] A Chosen Ciphertext Attack on RSA OAEP as Standardized in PKCS #1 v2.0
+    
     [5] PKCS #1: RSA Cryptography Specifications Version 2.0; James Manger
         http://tools.ietf.org/html/rfc2437   
     [6] A Practical Implementation of the Timing Attack; Dhem et al.
+    
         http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.12.3070 
 
 
