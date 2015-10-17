@@ -1,0 +1,128 @@
+Q.1 The vendor of the attack target is concerned that news of this attack
+    could scare off potential customers; they will make any alteration
+    necessary (in software or hardware) to prevent the attack.  Explain the
+    options they have, and which one you would recommend.
+    
+A.1 Potential solutions:
+    1) Exponent Blinding:
+        - Add a multiple of phi(N) to the private exponent before performing the
+          modular exponentiation; by doing this the same message is produced 
+          from the ciphertext due to modular arithmetic properties.
+        - Instead of computing m = c^d mod N,
+          compute m = c^(d * r * phi(N)) mod N where r is a random number such
+           that gcd(r,N) = 1 (r needs to have an inverse).
+        - This method introduces more noise in the decryption time which makes
+          the statistical analysis harder.
+        - Unfortunately, according to a paper by Werner Schindler[1] such a 
+          prevention method is not entirely secure.
+    
+    2) Base Blinding
+        - Before decoding the ciphertext, multiply it by a random number raised
+          to the public exponent, e. This method can randomise the number of
+          reductions performed for decding a ciphertext.
+        - Instead of decodeing m = c^d mod N,
+          compute m = ((c * r^e)^d)/r mod N; where r<N is a random number;
+        - According to the same paper [1], combining Base Blinding with Exponent
+          Blinding is sufficient to prevent the attack presented in it but it
+          might still be vulnerable to other types of timing attacks.
+          
+    3) Blocking frequent handshake requests and frequently changing the
+       public / private key.
+        - Since the e-commerce server is the one performing the decryption I
+          assume that the symmetric is key is chosen by the client, encrypted 
+          with the public key of the server and then sent to it.
+        - The server could change the pair of private / public keys once a
+          number of requests were received and also block repeated requests
+          from the same source.
+          
+    4) Fixed time for decrypting a ciphertext
+        - This can be achieved by setting an upper bound deciphering time and
+          making the server wait until that wall time is reached before sending 
+          back the response.
+        - A similar result can be achieved by adding a random amount of time for 
+          decrypting a message.
+        - These 2 methods are still vulnerable to some attacks because the
+          server might start performing some other tasks while waiting for the
+          wall time to be reached; this also depends on how "close" the attacker
+          is to the server.
+        - The disadvantage of this method is that it increases the running time.
+        
+        * A different approach would be to use bucketing and return the result
+          at small numbers of fixed points in time; This paper [2] states that
+          bucketing in conjunction with blinding can be secure for any practical
+          purposes and has an upper bound of bits leaked = O(log2(n + 1))
+        
+    Personally I would use method 3) in conjunction with 4).
+        
+    References:
+    [1] Exponent Blinding May Not Prevent Timing Attacks on RSA; Werner Schindler
+        https://eprint.iacr.org/2014/869.pdf
+    [2] A Provably Secure And Efficient Countermeasure Against Timing Attacks;
+        Boris Kopf and Markus Durmuth
+        http://software.imdea.org/~bkoepf/papers/csf09.pdf
+    
+================================================================================    
+Q.2 Let n denote the number of simulated clock cycles required to execute a
+    Montgomery multiplication on the attack target.  Estimate the value of
+    n (as accurately as you can) and explain how you did so.
+    
+A.2 The assignment description states that the simulated replica R returns the
+    number of clock cycles for performing the decryption.
+    
+    - By selecting a ciphertext c=0 we can be sure that there will be no
+      Montgomery reductions.
+    - Using the rationale from A.6 I determined that the decryption time T is:
+        T = MontMul_time * (B+H+1) where
+            - B = length of the key in bits
+            - H = hamming weight of the key
+    - Asking the replica R to decrypt c=0 using a key for which we know B and H
+      I calculated MontMul_time = T / (B+H+1) = 512 clock cycles => A montgomery
+      multiplication takes 512 clock cycles ( + no of clock cycles to do the 
+      final reduction)
+      
+    - I assume that 512 is not the actual number of clock cycles and that this
+      value is just hard-coded in the replica.
+
+================================================================================       
+Q.8 The level of noise, n, within measurements of execution time will
+    influence the number of measurements, m, required for a successful
+    attack.  Explain what the relationship between n and m is (i.e., how
+    you expect m to grow as n grows).
+    
+A.8 A paper by Wing H. Wong [1] states that the number of samples needed is
+    proportional to the length of the key because each extra bit in the key 
+    increases the level of noise by a constant amount.
+    On average, I expect m/n to have a constant value;
+    
+    References:
+    [1] Timing Attacks on RSA: Revealing Your Secrets through the Fourth Dimension;
+        Wing H. Wong
+        http://www.cs.sjsu.edu/faculty/stamp/students/article.html
+    
+================================================================================    
+Q.6 You were provided with a replica of the attack target.  If you used it,
+    explain how; if not, explain why, and how you could do so given more
+    time.
+    
+A.6 I used the target to figure out the time to perform a Montgomery
+    multiplication (MontMult_time) and the initialisation time (Init_time).
+    Let B = bit_length(d)              (d is the private exponent for RSA)
+        H = hamming_weight(d)
+    
+    I assumed that the decryption time T is:
+    T = Init_time + B*Square_time + H*Multiply_time + X*MontRed_time
+    
+    But: - Square_time = Multiply_time = MontMul_time
+         - When deciphering c=0 => X = 0
+    I assumed that Init_Time is just te time to encode the cipher in Mont form
+    which is just a Montgomery multiplication => Init_Time = MontMul_Time
+    From the previous observations =>
+    T = MontMul_time + (B+H)*MontMul_time (when deciphering c=0) =>
+    We can find the value of B+H = T/MontMul_time - 1
+    
+    
+    This value can be used to:
+        - set an upper bound to the key length
+        - detect errors when the guessed key does not fit the model
+        - switch to a brute force when the number of bits left is small in order
+          to avoid incorrectly guessing some of the last bits
