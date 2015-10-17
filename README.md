@@ -21,6 +21,8 @@ The code is just for practice and should not be used in production
 
 Initially tried implementing them in python but it was too slow so I switched to C and parallelised them with OpenMP.
 
-####PS:
+####Notes:
 - Each folder has an individual README.md that contains some description about the implementation / attack technique.
 - Most of the code was written for efficiency and not readbility
+- 54515.D are executables which represent the targets that have to be attacked;
+- 54515.R are executables that represent replicas of the attackers and that have some more options
