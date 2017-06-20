@@ -1,7 +1,7 @@
 This is the first time I have written code in python so the code might not
 be (very) clean.
 
-###Attack against RSAES-OAEP PKCS #1 based on error codes
+### Attack against RSAES-OAEP PKCS #1 based on error codes
 
 * In the third step of the OAEP attack, when the difference between the m_min and m_max is less
   than a threshold (10-15 bits at most in python) I switch to brute forcing the
@@ -9,7 +9,7 @@ be (very) clean.
   the oracle. 
   
 
-###Timing attack on RSA
+### Timing attack on RSA
 * Any time the attack fails I increase the sample size by 50%, adding new
   messages;
   
